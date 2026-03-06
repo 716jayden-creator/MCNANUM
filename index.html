@@ -10,19 +10,26 @@
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #1E1E1E; margin: 0; color: #FFFFFF; overflow: hidden; }
         h1 { color: #E1FF00; margin-bottom: 50px; font-size: 60px; font-weight: 900; letter-spacing: 5px; text-shadow: 3px 3px 15px rgba(225, 255, 0, 0.2); }
+        
         .main-btn { padding: 22px 55px; font-size: 28px; font-weight: 900; border-radius: 60px; cursor: pointer; transition: 0.2s; font-family: 'Pretendard', sans-serif; margin: 10px; border: none; }
         #shareBtn { background-color: #E1FF00; color: #1E1E1E; box-shadow: 0 0 25px rgba(225, 255, 0, 0.4); }
         #viewAllBtn { background-color: transparent; color: #E1FF00; border: 3px solid #E1FF00; }
-        #resetBtn { margin-top: 20px; color: #666; background: none; border: 1px solid #444; border-radius: 10px; padding: 10px 20px; cursor: pointer; }
-        #resetBtn:hover { color: #FF3366; border-color: #FF3366; }
-        .timer-section { display: none; position: fixed; top: 40px; right: 40px; background-color: #2A2A2A; padding: 25px; border-radius: 25px; border: 3px solid #E1FF00; z-index: 2000; text-align: center; }
-        #timeDisplay { font-size: 60px; font-weight: 900; color: #E1FF00; font-variant-numeric: tabular-nums; }
-        .timer-controls button { background: none; border: 1px solid #555; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        
+        /* ⏱️ 타이머 스타일 업데이트 */
+        .timer-section { display: none; position: fixed; top: 40px; right: 40px; background-color: #2A2A2A; padding: 25px; border-radius: 25px; border: 3px solid #E1FF00; z-index: 2000; text-align: center; min-width: 200px; }
+        #timeDisplay { font-size: 60px; font-weight: 900; color: #E1FF00; font-variant-numeric: tabular-nums; margin-bottom: 15px; }
+        .timer-controls { display: flex; gap: 10px; justify-content: center; }
+        .timer-ctrl-btn { background: #444; border: none; color: white; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        .timer-ctrl-btn:hover { background: #555; color: #E1FF00; }
+
         .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1E1E1E; padding: 50px; border-radius: 30px; border: 3px solid #E1FF00; z-index: 1000; width: 85%; max-width: 850px; max-height: 80vh; overflow-y: auto; text-align: center; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; }
         .question-item { font-size: 26px; font-weight: 600; padding: 20px; margin: 15px 0; background: #2A2A2A; border-radius: 15px; border-left: 8px solid #E1FF00; text-align: left; list-style: none; line-height: 1.4; }
         .category-tag { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 16px; font-weight: 900; margin-right: 15px; vertical-align: middle; }
-        .tag-daily { background: #FF3366; color: white; } .tag-faith { background: #00E5FF; color: #1E1E1E; } .tag-growth { background: #B533FF; color: white; } .tag-user { background: #E1FF00; color: #1E1E1E; }
+        .tag-daily { background: #FF3366; color: white; } 
+        .tag-faith { background: #00E5FF; color: #1E1E1E; } 
+        .tag-growth { background: #B533FF; color: white; } 
+        .tag-user { background: #E1FF00; color: #1E1E1E; }
     </style>
 </head>
 <body>
@@ -33,14 +40,15 @@
         <button id="shareBtn" class="main-btn">나눔 질문 뽑기</button>
         <button id="viewAllBtn" class="main-btn">참여자 질문 보기</button>
     </div>
-    <button id="resetBtn">데이터 초기화</button>
 
     <div id="overlay"></div>
+
     <div id="timerSection" class="timer-section">
         <div id="timeDisplay">05:00</div>
         <div class="timer-controls">
-            <button id="pauseTimerBtn">일시정지</button>
-            <button id="resumeTimerBtn">재개</button>
+            <button id="pauseTimerBtn" class="timer-ctrl-btn">일시정지</button>
+            <button id="resumeTimerBtn" class="timer-ctrl-btn">재개</button>
+            <button id="resetTimerBtn" class="timer-ctrl-btn" style="color: #FF3366;">초기화</button>
         </div>
     </div>
 
@@ -57,7 +65,6 @@
     </div>
 
     <script>
-        const ADMIN_PW = "1234"; // 🔑 관리자 비밀번호
         const firebaseConfig = {
             apiKey: "AIzaSyAtJZcxGVtO-yPHJUNo9AK9wl_2Bk7SpEw",
             authDomain: "mc-nanum.firebaseapp.com",
@@ -76,9 +83,9 @@
             snap.forEach(c => remoteQuestions.push(c.val().text));
         });
 
-        const dailyQ = ["최근 가장 기분 좋았던 일은?", "최근 가장 감사했던 일은?", "최근 힘들거나 짜증났던 일은?", "현재 자신의 최대 관심사는?", "최근 가장 맛있게 먹었던 음식은?", "최근 재밌게 본 영화/책은?", "최근 새로 알게 된 사람의 첫인상은?", "최근 가장 좋았던 핫플레이스는?", "최근 처음으로 시도한 일은?"];
-        const faithQ = ["하나님이 의미있는 존재가 된 것은 언제?", "기억에 남는 하나님의 은혜는?", "하나님이 주신 꿈이 있다면?", "하나님 하면 떠오르는 색/모양은?", "하나님과 가장 가까웠을 때/멀어졌을 때는?", "최근 하나님에 대해 새롭게 안 것은?", "최근 누군가를 섬긴 기쁨은?", "하고 싶거나 하고 있는 봉사는?", "공동체가 어떤 모습이 되길 바라나?", "하나님이 내 삶에서 변화시키는 부분은?", "하나님을 온전히 신뢰했던 순간은?"];
-        const growthQ = ["어릴 적 무서웠던 기억은?", "학창 시절 기억나는 순간은?", "장래희망은 무엇이었나?", "가장 아끼는 물건과 그 이유는?", "취미와 스트레스 해소법은?", "가장 닮고 싶은 사람은?", "화가 날 때 참는 방법은?", "인생에서 가장 잘한/후회하는 선택은?", "어떤 사람으로 기억되고 싶나?", "배우자 이상형은?"];
+        const dailyQ = ["최근 가장 기분 좋았던 일은 무엇인가요? 그 이유는?", "최근 가장 감사했던 일은 무엇인가요? 그 이유는?", "최근 힘들거나 짜증났던 일은 무엇인가요? 그 이유는?", "현재 자신의 최대 관심사는 무엇인가요? 그 이유는?", "최근 가장 맛있게 먹었던 음식은 무엇인가요?", "최근 가장 재밌게 본 영화/책/TV프로그램은 무엇인가요?", "최근 새로 알게 된 사람이 있나요? 첫인상이 어땠나요?", "최근 가장 좋았던 핫플레이스는 어디인가요? 왜 좋은가요?", "최근에 무엇인가를 처음으로 시도한 일이 있나요?"];
+        const faithQ = ["하나님이 자신에게 의미있는 존재가 된 것은 언제였나요?", "하나님께로부터 받은 특별히 기억에 남는 은혜가 있다면?", "하나님이 내게 주신 꿈(비전)이 있다면?", "하나님을 생각하면 떠오르는 색이나 모양은 무엇인가요?", "하나님과 가장 가까웠을 때는 언제인가요?", "하나님과 가장 멀어졌을 때는 언제인가요?", "최근 하나님에 대해서 새롭게 알게 된 것은 무엇인가요?", "최근에 다른 사람을 섬기면서 기쁨을 맛본 적이 있나요?", "교회에서 봉사하고 있는 것은 무엇인가요? 없다면 하고싶은 봉사는 무엇인가요?", "우리 공동체가 어떤 공동체가 되길 바라시나요?", "당신의 삶에서 하나님께서 지금 변화시키고 계신 부분이 있다면 어느 것인가요?", "오직 하나님만이 하실 수 있는 일에 대해 그분을 온전히 신뢰했던 적이 있었나요? 그것은 무엇인가요?"];
+        const growthQ = ["태어난 곳은 어디인가요? 어디어디에서 살아보았나요?", "어렸을 적 가장 무서웠던 적은 언제인가요?", "학창시절 가장 기억에 남는 순간이 있다면? 그 이유는?", "학창시절에 참여한 특별활동이 있었나요? 무엇인가요?", "학창시절 좋아했던 선생님은 어떤 분이셨나요?", "가장 좋아했던 과목은 무엇인가요?", "장래희망은 무엇이었나요?", "MBTI가 어떻게 되나요?", "가장 아끼는 물건은 무엇인가요? 그 이유는 무엇인가요?", "취미는 무엇인가요? (없다면 휴일에 주로 무엇을 하는지?)", "가장 가깝게 여기는 사람은 누구인가요?", "가장 닮고 싶은 사람은 누구인가요? 그 이유는?", "화가 날 때는 어떻게 행동하나요? 화를 참는 방법은?", "사람을 볼 때 가장 중요하게 생각하는 것은 무엇인가요?", "내 삶 속에서 가장 좋은 영향을 끼치는 사람은 누구인가요?", "가장 좋아하는 활동 3가지는 무엇인가요? 왜 좋아하나요?", "하루 중 가장 좋아하는 시간대는 언제인가요?", "어떨 때 스트레스를 받나요? 스트레스는 어떻게 푸나요?", "어떤 아르바이트를 해봤나요? 그것을 통해 무엇을 얻었나요?", "오늘 나의 기분을 날씨로 표현한다면? 그 이유는?", "받아 본 선물 중 가장 의미있는 선물은 무엇인가요?", "가장 아팠던 적은 언제인가요? 왜 그랬나요?", "인생에서 가장 잘한 선택이 있다면 무엇인가요?", "인생에서 가장 후회하는 선택이 있다면 무엇인가요?", "죽기 전에 꼭 해보고 싶은 일이 있다면? 그 이유는?", "어떤 배우자를 만나고 싶나요?", "당신은 어떤 사람으로 기억되기를 원하나요? 그 이유는?"];
 
         let timeLeft = 300; let timerInterval = null;
         function updateT() {
@@ -90,7 +97,7 @@
             if(timerInterval) return;
             timerInterval = setInterval(() => {
                 if(timeLeft > 0) { timeLeft--; updateT(); }
-                else { clearInterval(timerInterval); alert("나눔 종료!"); }
+                else { clearInterval(timerInterval); alert("나눔 시간이 종료되었습니다!"); }
             }, 1000);
         }
 
@@ -115,8 +122,8 @@
             timeLeft = 300; updateT(); startT();
         };
 
+        // 🔓 비밀번호 없이 바로 보기
         document.getElementById('viewAllBtn').onclick = () => {
-            if(prompt("비밀번호 입력") !== ADMIN_PW) return alert("틀렸습니다.");
             const list = document.getElementById('allQuestionList');
             list.innerHTML = "";
             [...remoteQuestions].reverse().forEach(q => {
@@ -127,14 +134,14 @@
             document.getElementById('allPopup').style.display = 'block';
         };
 
-        document.getElementById('resetBtn').onclick = () => {
-            if(prompt("초기화를 위한 비밀번호 입력") === ADMIN_PW) {
-                if(confirm("모든 질문을 삭제할까요?")) database.ref('questions').remove();
-            }
-        };
-
         document.getElementById('pauseTimerBtn').onclick = () => { clearInterval(timerInterval); timerInterval = null; };
         document.getElementById('resumeTimerBtn').onclick = startT;
+        
+        // ⏱️ 타이머 초기화 버튼 기능
+        document.getElementById('resetTimerBtn').onclick = () => {
+            clearInterval(timerInterval); timerInterval = null;
+            timeLeft = 300; updateT();
+        };
 
         function closePopups() {
             document.getElementById('overlay').style.display = 'none';
