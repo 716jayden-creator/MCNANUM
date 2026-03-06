@@ -20,18 +20,22 @@
         #timeDisplay { font-size: 50px; font-weight: 900; color: #E1FF00; margin-bottom: 10px; }
         .timer-btn { background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin: 2px; }
 
-        h1 { color: #E1FF00; font-size: 60px; font-weight: 900; margin-bottom: 40px; }
+        h1 { color: #E1FF00; font-size: 60px; font-weight: 900; margin-bottom: 40px; letter-spacing: 5px; }
         .main-btn { padding: 20px 50px; font-size: 26px; font-weight: 900; border-radius: 50px; cursor: pointer; margin: 10px; border: none; transition: 0.2s; }
-        #shareBtn { background: #E1FF00; color: #1E1E1E; }
+        #shareBtn { background: #E1FF00; color: #1E1E1E; box-shadow: 0 0 20px rgba(225, 255, 0, 0.3); }
         #viewAllBtn { background: transparent; color: #E1FF00; border: 2px solid #E1FF00; }
         
-        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1E1E1E; padding: 40px; border-radius: 30px; border: 3px solid #E1FF00; z-index: 3000; width: 80%; max-width: 800px; max-height: 70vh; overflow-y: auto; }
+        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1E1E1E; padding: 40px; border-radius: 30px; border: 3px solid #E1FF00; z-index: 3000; width: 85%; max-width: 850px; max-height: 80vh; overflow-y: auto; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; }
-        .question-item { font-size: 24px; padding: 20px; margin: 10px 0; background: #2A2A2A; border-radius: 15px; border-left: 8px solid #E1FF00; list-style: none; text-align: left; }
+        .question-item { font-size: 24px; font-weight: 600; padding: 20px; margin: 15px 0; background: #2A2A2A; border-radius: 15px; border-left: 8px solid #E1FF00; list-style: none; text-align: left; line-height: 1.4; }
         
-        /* 🗑️ 초기화 버튼 스타일 */
+        .category-tag { display: inline-block; padding: 3px 10px; border-radius: 5px; font-size: 14px; font-weight: 900; margin-right: 12px; vertical-align: middle; }
+        .tag-daily { background: #FF3366; color: white; } 
+        .tag-faith { background: #00E5FF; color: #1E1E1E; } 
+        .tag-growth { background: #B533FF; color: white; } 
+        .tag-user { background: #E1FF00; color: #1E1E1E; }
+
         .danger-btn { background: #FF3366; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; float: right; margin-bottom: 20px; }
-        .danger-btn:hover { background: #FF0044; }
     </style>
 </head>
 <body>
@@ -43,9 +47,11 @@
 
     <div id="timerSection" class="timer-section">
         <div id="timeDisplay">05:00</div>
-        <button class="timer-btn" onclick="pauseT()">일시정지</button>
-        <button class="timer-btn" onclick="startT()">재개</button>
-        <button class="timer-btn" onclick="resetT()" style="color:#FF3366">초기화</button>
+        <div class="timer-controls">
+            <button class="timer-btn" onclick="pauseT()">일시정지</button>
+            <button class="timer-btn" onclick="startT()">재개</button>
+            <button class="timer-btn" onclick="resetT()" style="color:#FF3366">초기화</button>
+        </div>
     </div>
 
     <h1>오늘의 나눔</h1>
@@ -58,16 +64,16 @@
     <div id="overlay"></div>
 
     <div id="drawPopup" class="popup">
-        <h2 style="color:#E1FF00">선택된 질문</h2>
+        <h2 style="color:#E1FF00; font-size: 32px; margin-top: 0;">선택된 나눔 질문</h2>
         <ul id="drawList" style="padding:0"></ul>
-        <button class="main-btn" onclick="closePopups()" style="background:#444; color:white; font-size:18px">닫기</button>
+        <button class="main-btn" onclick="closePopups()" style="background:#444; color:white; font-size:18px; margin-top: 20px;">닫기</button>
     </div>
 
     <div id="allPopup" class="popup">
         <button class="danger-btn" onclick="clearData()">⚠️ 전체 질문 삭제</button>
-        <h2 style="color:#E1FF00; clear: both;">모든 질문 목록</h2>
+        <h2 style="color:#E1FF00; clear: both; font-size: 32px;">모든 질문 목록</h2>
         <ul id="allList" style="padding:0"></ul>
-        <button class="main-btn" onclick="closePopups()" style="background:#444; color:white; font-size:18px">닫기</button>
+        <button class="main-btn" onclick="closePopups()" style="background:#444; color:white; font-size:18px; margin-top: 20px;">닫기</button>
     </div>
 
     <script>
@@ -89,48 +95,47 @@
             snapshot.forEach(child => { remoteQ.push(child.val().text); });
         });
 
-        // 🗑️ 데이터 초기화 함수
         function clearData() {
-            if(confirm("정말로 모든 질문을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.")) {
-                database.ref('questions').remove()
-                .then(() => {
-                    alert("모든 질문이 삭제되었습니다.");
-                    document.getElementById('allList').innerHTML = "";
-                    closePopups();
-                })
-                .catch(e => alert("삭제 실패: " + e.message));
+            if(confirm("정말로 모든 참여자 질문을 삭제하시겠습니까?")) {
+                database.ref('questions').remove().then(() => { alert("삭제되었습니다."); closePopups(); });
             }
         }
 
-        const daily = ["최근 감사했던 일은?", "오늘의 기분은?", "가장 맛있게 먹은 음식은?", "최근 즐거웠던 일은?", "요즘 나의 최대 관심사는?", "나를 기분 좋게 하는 말은?"];
-        let timeLeft = 300; let timerInterval = null;
+        // 🌟 복구된 기본 질문 리스트
+        const dailyQ = ["최근 가장 기분 좋았던 일은?", "최근 가장 감사했던 일은?", "최근 힘들거나 짜증났던 일은?", "현재 자신의 최대 관심사는?", "최근 가장 맛있게 먹었던 음식은?"];
+        const faithQ = ["하나님이 내게 주신 꿈(비전)이 있다면?", "하나님과 가장 가까웠을 때는 언제인가요?", "최근 하나님에 대해 새롭게 알게 된 것은?", "우리 공동체가 어떤 모습이 되길 바라나요?", "하나님을 온전히 신뢰했던 순간은?"];
+        const growthQ = ["MBTI가 어떻게 되나요?", "가장 아끼는 물건과 그 이유는?", "가장 닮고 싶은 사람은 누구인가요?", "인생에서 가장 잘한 선택은?", "어떤 사람으로 기억되고 싶나요?"];
 
-        function startT() {
-            if(timerInterval) return;
-            timerInterval = setInterval(() => {
-                if(timeLeft > 0) { timeLeft--; updateDisp(); }
-                else { clearInterval(timerInterval); alert("시간 종료!"); }
-            }, 1000);
-        }
-        function pauseT() { clearInterval(timerInterval); timerInterval = null; }
-        function resetT() { pauseT(); timeLeft = 300; updateDisp(); }
+        let timeLeft = 300; let timerInterval = null;
         function updateDisp() {
             const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
             const s = (timeLeft%60).toString().padStart(2,'0');
             document.getElementById('timeDisplay').textContent = `${m}:${s}`;
         }
+        function startT() { if(timerInterval) return; timerInterval = setInterval(() => { if(timeLeft > 0) { timeLeft--; updateDisp(); } else { clearInterval(timerInterval); alert("시간 종료!"); } }, 1000); }
+        function pauseT() { clearInterval(timerInterval); timerInterval = null; }
+        function resetT() { pauseT(); timeLeft = 300; updateDisp(); }
 
         document.getElementById('shareBtn').onclick = () => {
             const list = document.getElementById('drawList');
             list.innerHTML = "";
-            const add = (txt, isUser) => {
+            const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
+            const add = (tag, txt, cls) => {
                 const li = document.createElement('li'); li.className = 'question-item';
-                li.innerHTML = isUser ? `<span style="background:#E1FF00; color:#1E1E1E; padding:3px 8px; border-radius:5px; font-size:14px; font-weight:900; margin-right:10px;">참여자</span> ${txt}` : txt;
+                li.innerHTML = `<span class="category-tag ${cls}">${tag}</span> ${txt}`;
                 list.appendChild(li);
             };
-            add(daily[Math.floor(Math.random()*daily.length)], false);
-            const shuffled = [...remoteQ].sort(() => 0.5 - Math.random());
-            shuffled.slice(0, 2).forEach(q => add(q, true));
+
+            // 기본 질문 3종 세트
+            add("일상", pick(dailyQ), "tag-daily");
+            add("신앙", pick(faithQ), "tag-faith");
+            add("가치관", pick(growthQ), "tag-growth");
+
+            // 참여자 질문 중 랜덤 2개 (있을 때만)
+            if(remoteQ.length > 0) {
+                const shuffled = [...remoteQ].sort(() => 0.5 - Math.random());
+                shuffled.slice(0, 2).forEach(q => add("참여자", q, "tag-user"));
+            }
 
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('drawPopup').style.display = 'block';
@@ -141,6 +146,7 @@
         document.getElementById('viewAllBtn').onclick = () => {
             const list = document.getElementById('allList');
             list.innerHTML = "";
+            if(remoteQ.length === 0) { list.innerHTML = "<p style='color:#888'>아직 등록된 질문이 없습니다.</p>"; }
             [...remoteQ].reverse().forEach(q => {
                 const li = document.createElement('li'); li.className = 'question-item';
                 li.innerHTML = q; list.appendChild(li);
