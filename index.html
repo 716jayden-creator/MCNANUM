@@ -28,8 +28,10 @@
         .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1E1E1E; padding: 40px; border-radius: 30px; border: 3px solid #E1FF00; z-index: 3000; width: 80%; max-width: 800px; max-height: 70vh; overflow-y: auto; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; }
         .question-item { font-size: 24px; padding: 20px; margin: 10px 0; background: #2A2A2A; border-radius: 15px; border-left: 8px solid #E1FF00; list-style: none; text-align: left; }
-        .category-tag { padding: 3px 10px; border-radius: 5px; font-size: 14px; font-weight: 900; margin-right: 10px; }
-        .tag-user { background: #E1FF00; color: #1E1E1E; }
+        
+        /* 🗑️ 초기화 버튼 스타일 */
+        .danger-btn { background: #FF3366; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; float: right; margin-bottom: 20px; }
+        .danger-btn:hover { background: #FF0044; }
     </style>
 </head>
 <body>
@@ -62,7 +64,8 @@
     </div>
 
     <div id="allPopup" class="popup">
-        <h2 style="color:#E1FF00">모든 질문 목록</h2>
+        <button class="danger-btn" onclick="clearData()">⚠️ 전체 질문 삭제</button>
+        <h2 style="color:#E1FF00; clear: both;">모든 질문 목록</h2>
         <ul id="allList" style="padding:0"></ul>
         <button class="main-btn" onclick="closePopups()" style="background:#444; color:white; font-size:18px">닫기</button>
     </div>
@@ -81,15 +84,25 @@
         const database = firebase.database();
 
         let remoteQ = [];
-        // 📥 데이터 실시간 동기화 (항상 전체 목록을 가지고 있음)
         database.ref('questions').on('value', (snapshot) => {
             remoteQ = [];
-            snapshot.forEach(child => {
-                remoteQ.push(child.val().text);
-            });
+            snapshot.forEach(child => { remoteQ.push(child.val().text); });
         });
 
-        const daily = ["최근 감사했던 일은?", "오늘의 기분은?", "가장 맛있게 먹은 음식은?", "최근 즐거웠던 일은?"];
+        // 🗑️ 데이터 초기화 함수
+        function clearData() {
+            if(confirm("정말로 모든 질문을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.")) {
+                database.ref('questions').remove()
+                .then(() => {
+                    alert("모든 질문이 삭제되었습니다.");
+                    document.getElementById('allList').innerHTML = "";
+                    closePopups();
+                })
+                .catch(e => alert("삭제 실패: " + e.message));
+            }
+        }
+
+        const daily = ["최근 감사했던 일은?", "오늘의 기분은?", "가장 맛있게 먹은 음식은?", "최근 즐거웠던 일은?", "요즘 나의 최대 관심사는?", "나를 기분 좋게 하는 말은?"];
         let timeLeft = 300; let timerInterval = null;
 
         function startT() {
@@ -112,11 +125,10 @@
             list.innerHTML = "";
             const add = (txt, isUser) => {
                 const li = document.createElement('li'); li.className = 'question-item';
-                li.innerHTML = isUser ? `<span class="category-tag tag-user">참여자</span> ${txt}` : txt;
+                li.innerHTML = isUser ? `<span style="background:#E1FF00; color:#1E1E1E; padding:3px 8px; border-radius:5px; font-size:14px; font-weight:900; margin-right:10px;">참여자</span> ${txt}` : txt;
                 list.appendChild(li);
             };
             add(daily[Math.floor(Math.random()*daily.length)], false);
-            // 참여자 질문 중 랜덤 2개
             const shuffled = [...remoteQ].sort(() => 0.5 - Math.random());
             shuffled.slice(0, 2).forEach(q => add(q, true));
 
@@ -139,7 +151,8 @@
 
         function closePopups() {
             document.getElementById('overlay').style.display = 'none';
-            document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
+            document.getElementById('drawPopup').style.display = 'none';
+            document.getElementById('allPopup').style.display = 'none';
             document.getElementById('timerSection').style.display = 'none';
             pauseT();
         }
