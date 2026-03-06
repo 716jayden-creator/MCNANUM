@@ -1,68 +1,49 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘의 나눔 - 메인</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #1E1E1E; margin: 0; color: #FFFFFF; overflow: hidden; }
-        
-        /* 📍 좌측 상단 QR */
-        .qr-container { position: fixed; top: 30px; left: 30px; background: rgba(42,42,42,0.9); padding: 15px; border-radius: 20px; border: 2px solid #E1FF00; text-align: center; z-index: 2000; }
-        .qr-container img { width: 100px; height: 100px; background: white; padding: 5px; border-radius: 10px; }
-        .qr-container p { margin: 5px 0 0; color: #E1FF00; font-size: 14px; font-weight: 900; }
+document.getElementById('shareBtn').onclick = () => {
+            const list = document.getElementById('drawList');
+            list.innerHTML = "";
+            const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            const add = (tag, txt, cls) => {
+                const li = document.createElement('li'); li.className = 'question-item';
+                li.innerHTML = `<span class="category-tag ${cls}">${tag}</span> ${txt}`;
+                list.appendChild(li);
+            };
 
-        /* ⏱️ 우측 상단 타이머 */
-        .timer-section { display: none; position: fixed; top: 30px; right: 30px; background: #2A2A2A; padding: 20px; border-radius: 20px; border: 3px solid #E1FF00; z-index: 2000; text-align: center; }
-        #timeDisplay { font-size: 50px; font-weight: 900; color: #E1FF00; margin-bottom: 10px; }
-        .timer-btn { background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin: 2px; }
+            // 1️⃣ 기본 질문 리스트 통합 (일상, 신앙, 가치관 중 랜덤 2개)
+            const allBasicQ = [...dailyQ, ...faithQ, ...growthQ];
+            const pickedBasic = [];
+            while(pickedBasic.length < 2) {
+                const q = pick(allBasicQ);
+                if(!pickedBasic.includes(q)) pickedBasic.push(q);
+            }
+            
+            pickedBasic.forEach(q => {
+                // 어떤 카테고리인지 찾아서 태그 달아주기
+                let tag = "공통"; let cls = "tag-daily";
+                if(dailyQ.includes(q)) { tag = "일상"; cls = "tag-daily"; }
+                else if(faithQ.includes(q)) { tag = "신앙"; cls = "tag-faith"; }
+                else if(growthQ.includes(q)) { tag = "가치관"; cls = "tag-growth"; }
+                add(tag, q, cls);
+            });
 
-        h1 { color: #E1FF00; font-size: 60px; font-weight: 900; margin-bottom: 40px; letter-spacing: 5px; }
-        .main-btn { padding: 20px 50px; font-size: 26px; font-weight: 900; border-radius: 50px; cursor: pointer; margin: 10px; border: none; transition: 0.2s; }
-        #shareBtn { background: #E1FF00; color: #1E1E1E; box-shadow: 0 0 20px rgba(225, 255, 0, 0.3); }
-        #viewAllBtn { background: transparent; color: #E1FF00; border: 2px solid #E1FF00; }
-        
-        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1E1E1E; padding: 40px; border-radius: 30px; border: 3px solid #E1FF00; z-index: 3000; width: 85%; max-width: 850px; max-height: 80vh; overflow-y: auto; }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; }
-        .question-item { font-size: 24px; font-weight: 600; padding: 20px; margin: 15px 0; background: #2A2A2A; border-radius: 15px; border-left: 8px solid #E1FF00; list-style: none; text-align: left; line-height: 1.4; }
-        
-        .category-tag { display: inline-block; padding: 3px 10px; border-radius: 5px; font-size: 14px; font-weight: 900; margin-right: 12px; vertical-align: middle; }
-        .tag-daily { background: #FF3366; color: white; } 
-        .tag-faith { background: #00E5FF; color: #1E1E1E; } 
-        .tag-growth { background: #B533FF; color: white; } 
-        .tag-user { background: #E1FF00; color: #1E1E1E; }
+            // 2️⃣ 참가자 질문 중 랜덤 3개 뽑기
+            if(remoteQ.length > 0) {
+                const shuffledUserQ = [...remoteQ].sort(() => 0.5 - Math.random());
+                // 최대 3개까지만 추출
+                const pickedUser = shuffledUserQ.slice(0, 3);
+                pickedUser.forEach(q => add("참가자", q, "tag-user"));
+            } else {
+                // 참가자 질문이 하나도 없을 경우 안내 메시지 (선택 사항)
+                const li = document.createElement('li'); 
+                li.style.color = "#888"; li.style.fontSize = "18px"; li.style.padding = "20px";
+                li.innerHTML = "💡 아직 참가자 질문이 없습니다. QR코드로 질문을 남겨주세요!";
+                list.appendChild(li);
+            }
 
-        .danger-btn { background: #FF3366; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; float: right; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
-
-    <div class="qr-container">
-        <img src="qr.png" alt="QR">
-        <p>질문 남기기</p>
-    </div>
-
-    <div id="timerSection" class="timer-section">
-        <div id="timeDisplay">05:00</div>
-        <div class="timer-controls">
-            <button class="timer-btn" onclick="pauseT()">일시정지</button>
-            <button class="timer-btn" onclick="startT()">재개</button>
-            <button class="timer-btn" onclick="resetT()" style="color:#FF3366">초기화</button>
-        </div>
-    </div>
-
-    <h1>오늘의 나눔</h1>
-
-    <div class="button-group">
-        <button id="shareBtn" class="main-btn">나눔 질문 뽑기</button>
-        <button id="viewAllBtn" class="main-btn">참여자 질문 보기</button>
-    </div>
-
-    <div id="overlay"></div>
-
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('drawPopup').style.display = 'block';
+            document.getElementById('timerSection').style.display = 'block';
+            resetT(); startT();
+        };
     <div id="drawPopup" class="popup">
         <h2 style="color:#E1FF00; font-size: 32px; margin-top: 0;">선택된 나눔 질문</h2>
         <ul id="drawList" style="padding:0"></ul>
