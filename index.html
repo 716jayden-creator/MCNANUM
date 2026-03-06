@@ -9,74 +9,43 @@
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #1E1E1E; margin: 0; color: #FFFFFF; overflow: hidden; }
-        h1 { color: #E1FF00; margin-bottom: 50px; font-size: 60px; font-weight: 900; letter-spacing: 5px; text-shadow: 3px 3px 15px rgba(225, 255, 0, 0.2); }
         
-        .main-btn { padding: 22px 55px; font-size: 28px; font-weight: 900; border-radius: 60px; cursor: pointer; transition: 0.2s; font-family: 'Pretendard', sans-serif; margin: 10px; border: none; }
-        #shareBtn { background-color: #E1FF00; color: #1E1E1E; box-shadow: 0 0 25px rgba(225, 255, 0, 0.4); }
-        #viewAllBtn { background-color: transparent; color: #E1FF00; border: 3px solid #E1FF00; }
-        
-        /* ⏱️ 타이머 스타일 업데이트 */
-        .timer-section { display: none; position: fixed; top: 40px; right: 40px; background-color: #2A2A2A; padding: 25px; border-radius: 25px; border: 3px solid #E1FF00; z-index: 2000; text-align: center; min-width: 200px; }
-        #timeDisplay { font-size: 60px; font-weight: 900; color: #E1FF00; font-variant-numeric: tabular-nums; margin-bottom: 15px; }
-        .timer-controls { display: flex; gap: 10px; justify-content: center; }
-        .timer-ctrl-btn { background: #444; border: none; color: white; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
-        .timer-ctrl-btn:hover { background: #555; color: #E1FF00; }
+        /* 📍 좌측 상단 QR */
+        .qr-container { position: fixed; top: 30px; left: 30px; background: rgba(42,42,42,0.9); padding: 15px; border-radius: 20px; border: 2px solid #E1FF00; text-align: center; z-index: 2000; }
+        .qr-container img { width: 100px; height: 100px; background: white; padding: 5px; border-radius: 10px; }
+        .qr-container p { margin: 5px 0 0; color: #E1FF00; font-size: 14px; font-weight: 900; }
 
-        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1E1E1E; padding: 50px; border-radius: 30px; border: 3px solid #E1FF00; z-index: 1000; width: 85%; max-width: 850px; max-height: 80vh; overflow-y: auto; text-align: center; }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; }
-        .question-item { font-size: 26px; font-weight: 600; padding: 20px; margin: 15px 0; background: #2A2A2A; border-radius: 15px; border-left: 8px solid #E1FF00; text-align: left; list-style: none; line-height: 1.4; }
-        .category-tag { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 16px; font-weight: 900; margin-right: 15px; vertical-align: middle; }
-        .tag-daily { background: #FF3366; color: white; } 
-        .tag-faith { background: #00E5FF; color: #1E1E1E; } 
-        .tag-growth { background: #B533FF; color: white; } 
+        /* ⏱️ 우측 상단 타이머 */
+        .timer-section { display: none; position: fixed; top: 30px; right: 30px; background: #2A2A2A; padding: 20px; border-radius: 20px; border: 3px solid #E1FF00; z-index: 2000; text-align: center; }
+        #timeDisplay { font-size: 50px; font-weight: 900; color: #E1FF00; margin-bottom: 10px; }
+        .timer-btn { background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin: 2px; }
+
+        h1 { color: #E1FF00; font-size: 60px; font-weight: 900; margin-bottom: 40px; }
+        .main-btn { padding: 20px 50px; font-size: 26px; font-weight: 900; border-radius: 50px; cursor: pointer; margin: 10px; border: none; transition: 0.2s; }
+        #shareBtn { background: #E1FF00; color: #1E1E1E; }
+        #viewAllBtn { background: transparent; color: #E1FF00; border: 2px solid #E1FF00; }
+        
+        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1E1E1E; padding: 40px; border-radius: 30px; border: 3px solid #E1FF00; z-index: 3000; width: 80%; max-width: 800px; max-height: 70vh; overflow-y: auto; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; }
+        .question-item { font-size: 24px; padding: 20px; margin: 10px 0; background: #2A2A2A; border-radius: 15px; border-left: 8px solid #E1FF00; list-style: none; text-align: left; }
+        .category-tag { padding: 3px 10px; border-radius: 5px; font-size: 14px; font-weight: 900; margin-right: 10px; }
         .tag-user { background: #E1FF00; color: #1E1E1E; }
-        
-        /* 📌 좌측 상단 QR 코드 고정 디자인 */
-    .qr-container {
-        position: fixed;
-        top: 30px;
-        left: 30px;
-        background-color: rgba(42, 42, 42, 0.85); /* 세련된 반투명 검정 */
-        padding: 15px;
-        border-radius: 20px;
-        border: 2px solid #E1FF00; /* 네온 옐로우 테두리 */
-        text-align: center;
-        z-index: 2000; 
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        transition: transform 0.3s;
-    }
-    
-    .qr-container:hover {
-        transform: scale(1.05); /* 마우스 올리면 살짝 커짐 */
-    }
-
-    .qr-container img {
-        width: 110px; /* TV 크기에 따라 적절히 조절 */
-        height: 110px;
-        border-radius: 10px;
-        background-color: white; /* QR코드는 배경이 흰색일 때 잘 찍힙니다 */
-        padding: 5px;
-        margin-bottom: 10px;
-    }
-
-    .qr-container p {
-        margin: 0;
-        color: #E1FF00;
-        font-size: 15px;
-        font-weight: 900;
-        line-height: 1.4;
-    }</style>
-
-
-   
+    </style>
 </head>
 <body>
+
     <div class="qr-container">
-        <img src="qr.png" alt="질문 등록 QR">
-        <p>스캔해서<br>질문 남기기</p>
+        <img src="qr.png" alt="QR">
+        <p>질문 남기기</p>
     </div>
 
-    
+    <div id="timerSection" class="timer-section">
+        <div id="timeDisplay">05:00</div>
+        <button class="timer-btn" onclick="pauseT()">일시정지</button>
+        <button class="timer-btn" onclick="startT()">재개</button>
+        <button class="timer-btn" onclick="resetT()" style="color:#FF3366">초기화</button>
+    </div>
+
     <h1>오늘의 나눔</h1>
 
     <div class="button-group">
@@ -86,25 +55,16 @@
 
     <div id="overlay"></div>
 
-    <div id="timerSection" class="timer-section">
-        <div id="timeDisplay">05:00</div>
-        <div class="timer-controls">
-            <button id="pauseTimerBtn" class="timer-ctrl-btn">일시정지</button>
-            <button id="resumeTimerBtn" class="timer-ctrl-btn">재개</button>
-            <button id="resetTimerBtn" class="timer-ctrl-btn" style="color: #FF3366;">초기화</button>
-        </div>
-    </div>
-
     <div id="drawPopup" class="popup">
-        <h2 style="color: #E1FF00; font-size: 36px; margin-top: 0;">선택된 나눔 질문</h2>
-        <ul id="drawQuestionList" style="padding: 0;"></ul>
-        <button class="main-btn" onclick="closePopups()" style="font-size: 18px; padding: 12px 40px; background: #444; color: white; border-radius: 10px;">닫기</button>
+        <h2 style="color:#E1FF00">선택된 질문</h2>
+        <ul id="drawList" style="padding:0"></ul>
+        <button class="main-btn" onclick="closePopups()" style="background:#444; color:white; font-size:18px">닫기</button>
     </div>
 
     <div id="allPopup" class="popup">
-        <h2 style="color: #E1FF00; font-size: 36px;">참여자들이 등록한 질문</h2>
-        <ul id="allQuestionList" style="padding: 0;"></ul>
-        <button class="main-btn" onclick="closePopups()" style="font-size: 18px; padding: 12px 40px; background: #444; color: white; border-radius: 10px;">닫기</button>
+        <h2 style="color:#E1FF00">모든 질문 목록</h2>
+        <ul id="allList" style="padding:0"></ul>
+        <button class="main-btn" onclick="closePopups()" style="background:#444; color:white; font-size:18px">닫기</button>
     </div>
 
     <script>
@@ -120,56 +80,56 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let remoteQuestions = [];
-        database.ref('questions').on('value', (snap) => {
-            remoteQuestions = [];
-            snap.forEach(c => remoteQuestions.push(c.val().text));
+        let remoteQ = [];
+        // 📥 데이터 실시간 동기화 (항상 전체 목록을 가지고 있음)
+        database.ref('questions').on('value', (snapshot) => {
+            remoteQ = [];
+            snapshot.forEach(child => {
+                remoteQ.push(child.val().text);
+            });
         });
 
-        const dailyQ = ["최근 가장 기분 좋았던 일은 무엇인가요? 그 이유는?", "최근 가장 감사했던 일은 무엇인가요? 그 이유는?", "최근 힘들거나 짜증났던 일은 무엇인가요? 그 이유는?", "현재 자신의 최대 관심사는 무엇인가요? 그 이유는?", "최근 가장 맛있게 먹었던 음식은 무엇인가요?", "최근 가장 재밌게 본 영화/책/TV프로그램은 무엇인가요?", "최근 새로 알게 된 사람이 있나요? 첫인상이 어땠나요?", "최근 가장 좋았던 핫플레이스는 어디인가요? 왜 좋은가요?", "최근에 무엇인가를 처음으로 시도한 일이 있나요?"];
-        const faithQ = ["하나님이 자신에게 의미있는 존재가 된 것은 언제였나요?", "하나님께로부터 받은 특별히 기억에 남는 은혜가 있다면?", "하나님이 내게 주신 꿈(비전)이 있다면?", "하나님을 생각하면 떠오르는 색이나 모양은 무엇인가요?", "하나님과 가장 가까웠을 때는 언제인가요?", "하나님과 가장 멀어졌을 때는 언제인가요?", "최근 하나님에 대해서 새롭게 알게 된 것은 무엇인가요?", "최근에 다른 사람을 섬기면서 기쁨을 맛본 적이 있나요?", "교회에서 봉사하고 있는 것은 무엇인가요? 없다면 하고싶은 봉사는 무엇인가요?", "우리 공동체가 어떤 공동체가 되길 바라시나요?", "당신의 삶에서 하나님께서 지금 변화시키고 계신 부분이 있다면 어느 것인가요?", "오직 하나님만이 하실 수 있는 일에 대해 그분을 온전히 신뢰했던 적이 있었나요? 그것은 무엇인가요?"];
-        const growthQ = ["태어난 곳은 어디인가요? 어디어디에서 살아보았나요?", "어렸을 적 가장 무서웠던 적은 언제인가요?", "학창시절 가장 기억에 남는 순간이 있다면? 그 이유는?", "학창시절에 참여한 특별활동이 있었나요? 무엇인가요?", "학창시절 좋아했던 선생님은 어떤 분이셨나요?", "가장 좋아했던 과목은 무엇인가요?", "장래희망은 무엇이었나요?", "MBTI가 어떻게 되나요?", "가장 아끼는 물건은 무엇인가요? 그 이유는 무엇인가요?", "취미는 무엇인가요? (없다면 휴일에 주로 무엇을 하는지?)", "가장 가깝게 여기는 사람은 누구인가요?", "가장 닮고 싶은 사람은 누구인가요? 그 이유는?", "화가 날 때는 어떻게 행동하나요? 화를 참는 방법은?", "사람을 볼 때 가장 중요하게 생각하는 것은 무엇인가요?", "내 삶 속에서 가장 좋은 영향을 끼치는 사람은 누구인가요?", "가장 좋아하는 활동 3가지는 무엇인가요? 왜 좋아하나요?", "하루 중 가장 좋아하는 시간대는 언제인가요?", "어떨 때 스트레스를 받나요? 스트레스는 어떻게 푸나요?", "어떤 아르바이트를 해봤나요? 그것을 통해 무엇을 얻었나요?", "오늘 나의 기분을 날씨로 표현한다면? 그 이유는?", "받아 본 선물 중 가장 의미있는 선물은 무엇인가요?", "가장 아팠던 적은 언제인가요? 왜 그랬나요?", "인생에서 가장 잘한 선택이 있다면 무엇인가요?", "인생에서 가장 후회하는 선택이 있다면 무엇인가요?", "죽기 전에 꼭 해보고 싶은 일이 있다면? 그 이유는?", "어떤 배우자를 만나고 싶나요?", "당신은 어떤 사람으로 기억되기를 원하나요? 그 이유는?"];
-
+        const daily = ["최근 감사했던 일은?", "오늘의 기분은?", "가장 맛있게 먹은 음식은?", "최근 즐거웠던 일은?"];
         let timeLeft = 300; let timerInterval = null;
-        function updateT() {
-            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            const s = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timeDisplay').textContent = `${m}:${s}`;
-        }
+
         function startT() {
             if(timerInterval) return;
             timerInterval = setInterval(() => {
-                if(timeLeft > 0) { timeLeft--; updateT(); }
-                else { clearInterval(timerInterval); alert("나눔 시간이 종료되었습니다!"); }
+                if(timeLeft > 0) { timeLeft--; updateDisp(); }
+                else { clearInterval(timerInterval); alert("시간 종료!"); }
             }, 1000);
+        }
+        function pauseT() { clearInterval(timerInterval); timerInterval = null; }
+        function resetT() { pauseT(); timeLeft = 300; updateDisp(); }
+        function updateDisp() {
+            const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
+            const s = (timeLeft%60).toString().padStart(2,'0');
+            document.getElementById('timeDisplay').textContent = `${m}:${s}`;
         }
 
         document.getElementById('shareBtn').onclick = () => {
-            const list = document.getElementById('drawQuestionList');
+            const list = document.getElementById('drawList');
             list.innerHTML = "";
-            const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
-            const add = (tag, txt, cls) => {
+            const add = (txt, isUser) => {
                 const li = document.createElement('li'); li.className = 'question-item';
-                li.innerHTML = `<span class="category-tag ${cls}">${tag}</span> ${txt}`;
+                li.innerHTML = isUser ? `<span class="category-tag tag-user">참여자</span> ${txt}` : txt;
                 list.appendChild(li);
             };
-            add("일상", pick(dailyQ), "tag-daily");
-            add("신앙", pick(faithQ), "tag-faith");
-            add("가치관", pick(growthQ), "tag-growth");
-            const userPick = [...remoteQuestions].sort(() => 0.5 - Math.random()).slice(0, 2);
-            userPick.forEach(q => add("참여자", q, "tag-user"));
+            add(daily[Math.floor(Math.random()*daily.length)], false);
+            // 참여자 질문 중 랜덤 2개
+            const shuffled = [...remoteQ].sort(() => 0.5 - Math.random());
+            shuffled.slice(0, 2).forEach(q => add(q, true));
 
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('drawPopup').style.display = 'block';
             document.getElementById('timerSection').style.display = 'block';
-            timeLeft = 300; updateT(); startT();
+            resetT(); startT();
         };
 
-        // 🔓 비밀번호 없이 바로 보기
         document.getElementById('viewAllBtn').onclick = () => {
-            const list = document.getElementById('allQuestionList');
+            const list = document.getElementById('allList');
             list.innerHTML = "";
-            [...remoteQuestions].reverse().forEach(q => {
+            [...remoteQ].reverse().forEach(q => {
                 const li = document.createElement('li'); li.className = 'question-item';
                 li.innerHTML = q; list.appendChild(li);
             });
@@ -177,21 +137,11 @@
             document.getElementById('allPopup').style.display = 'block';
         };
 
-        document.getElementById('pauseTimerBtn').onclick = () => { clearInterval(timerInterval); timerInterval = null; };
-        document.getElementById('resumeTimerBtn').onclick = startT;
-        
-        // ⏱️ 타이머 초기화 버튼 기능
-        document.getElementById('resetTimerBtn').onclick = () => {
-            clearInterval(timerInterval); timerInterval = null;
-            timeLeft = 300; updateT();
-        };
-
         function closePopups() {
             document.getElementById('overlay').style.display = 'none';
-            document.getElementById('drawPopup').style.display = 'none';
-            document.getElementById('allPopup').style.display = 'none';
+            document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
             document.getElementById('timerSection').style.display = 'none';
-            clearInterval(timerInterval); timerInterval = null;
+            pauseT();
         }
     </script>
 </body>
