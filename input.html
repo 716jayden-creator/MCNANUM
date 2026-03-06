@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나눔 질문 등록하기</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background-color: #1E1E1E; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        h1 { color: #E1FF00; font-size: 28px; margin-bottom: 30px; font-weight: 900; }
+        .input-card { background: #2A2A2A; padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; border: 1px solid #444; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #555; background: #1E1E1E; color: white; font-size: 18px; box-sizing: border-box; margin-bottom: 20px; }
+        input:focus { border-color: #E1FF00; outline: none; }
+        button { width: 100%; padding: 15px; border-radius: 12px; border: none; background: #E1FF00; color: #1E1E1E; font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <h1>질문 남기기</h1>
+    <div class="input-card">
+        <input type="text" id="qInput" placeholder="이 사람에게 궁금한 점은?">
+        <button id="submitBtn">질문 보내기</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtJZcxGVtO-yPHJUNo9AK9wl_2Bk7SpEw",
+            authDomain: "mc-nanum.firebaseapp.com",
+            databaseURL: "https://mc-nanum-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "mc-nanum",
+            storageBucket: "mc-nanum.firebasestorage.app",
+            messagingSenderId: "825929409039",
+            appId: "1:825929409039:web:5e4fbe346f0273c3ee397a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.getElementById('submitBtn').onclick = () => {
+            const val = document.getElementById('qInput').value.trim();
+            if(val) {
+                database.ref('questions').push({
+                    text: val,
+                    timestamp: Date.now()
+                }).then(() => {
+                    alert("질문이 성공적으로 등록되었습니다!");
+                    document.getElementById('qInput').value = "";
+                });
+            } else {
+                alert("질문을 입력해 주세요.");
+            }
+        };
+    </script>
+</body>
+</html>
