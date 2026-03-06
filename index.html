@@ -30,6 +30,41 @@
         .tag-faith { background: #00E5FF; color: #1E1E1E; } 
         .tag-growth { background: #B533FF; color: white; } 
         .tag-user { background: #E1FF00; color: #1E1E1E; }
+        /* 📌 좌측 상단 QR 코드 고정 디자인 */
+    .qr-container {
+        position: fixed;
+        top: 30px;
+        left: 30px;
+        background-color: rgba(42, 42, 42, 0.85); /* 세련된 반투명 검정 */
+        padding: 15px;
+        border-radius: 20px;
+        border: 2px solid #E1FF00; /* 네온 옐로우 테두리 */
+        text-align: center;
+        z-index: 2000; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transition: transform 0.3s;
+    }
+    
+    .qr-container:hover {
+        transform: scale(1.05); /* 마우스 올리면 살짝 커짐 */
+    }
+
+    .qr-container img {
+        width: 110px; /* TV 크기에 따라 적절히 조절 */
+        height: 110px;
+        border-radius: 10px;
+        background-color: white; /* QR코드는 배경이 흰색일 때 잘 찍힙니다 */
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+
+    .qr-container p {
+        margin: 0;
+        color: #E1FF00;
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.4;
+    }
     </style>
 </head>
 <body>
