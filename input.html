@@ -10,9 +10,9 @@
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; background-color: #1E1E1E; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         h1 { color: #E1FF00; font-size: 28px; margin-bottom: 30px; font-weight: 900; }
-        .input-card { background: #2A2A2A; padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; border: 1px solid #444; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #555; background: #1E1E1E; color: white; font-size: 18px; box-sizing: border-box; margin-bottom: 20px; }
-        input:focus { border-color: #E1FF00; outline: none; }
+        .input-card { background: #2A2A2A; padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; border: 1px solid #444; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #555; background: #1E1E1E; color: white; font-size: 18px; box-sizing: border-box; margin-bottom: 20px; outline: none; }
+        input:focus { border-color: #E1FF00; }
         button { width: 100%; padding: 15px; border-radius: 12px; border: none; background: #E1FF00; color: #1E1E1E; font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.2s; }
         button:active { transform: scale(0.95); }
     </style>
@@ -20,8 +20,8 @@
 <body>
     <h1>질문 남기기</h1>
     <div class="input-card">
-        <input type="text" id="qInput" placeholder="이 사람에게 궁금한 점은?">
-        <button id="submitBtn">질문 보내기</button>
+        <input type="text" id="qInput" placeholder="무엇이든 물어보세요!" onkeypress="if(event.keyCode==13) sendQ()">
+        <button onclick="sendQ()">질문 보내기</button>
     </div>
 
     <script>
@@ -37,20 +37,20 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        document.getElementById('submitBtn').onclick = () => {
-            const val = document.getElementById('qInput').value.trim();
+        function sendQ() {
+            const qBox = document.getElementById('qInput');
+            const val = qBox.value.trim();
             if(val) {
+                // 🚀 .push()를 써야 데이터가 쌓입니다!
                 database.ref('questions').push({
                     text: val,
-                    timestamp: Date.now()
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 }).then(() => {
-                    alert("질문이 성공적으로 등록되었습니다!");
-                    document.getElementById('qInput').value = "";
-                });
-            } else {
-                alert("질문을 입력해 주세요.");
+                    alert("전송 완료!");
+                    qBox.value = "";
+                }).catch(e => alert("에러 발생: " + e.message));
             }
-        };
+        }
     </script>
 </body>
 </html>
